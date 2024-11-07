@@ -1,33 +1,30 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import { auth } from "../../../firebase";
 import Nav from '../../nav/Nav'
 
-export default function SignUp(){
+export default function SignIn(){
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [copyPassword, setCopyPassword] = useState("");
   const [error, setError] = useState("");
-  function register(e) {
+  function logIn(e) {
     e.preventDefault();
-    if (copyPassword !== password) {
-      setError("Passwords didn't match");
-      return;
-    }
-    createUserWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, email, password)
       .then((user) => {
         console.log(user);
         setError("");
         setEmail("");
-        setCopyPassword("");
         setPassword("");
       })
-      .catch((error) => console.log(error));
+        .catch((error) => {
+            console.log(error);
+            setError("SORRY, COULDN'T FIND YOUR ACCOUNT")
+      });
   }
   return (
     <div>
-      <form onSubmit={register}>
-        <h2>Create an account</h2>
+      <form>
+        <h2>Log in</h2>
         <input
           placeholder="Please enter your email"
           value={email}
@@ -40,17 +37,10 @@ export default function SignUp(){
           onChange={(e) => setPassword(e.target.value)}
           type="password"
         />
-        <input
-          placeholder="Please enter your password again"
-          value={copyPassword}
-          onChange={(e) => setCopyPassword(e.target.value)}
-          type="password"
-        />
-        <button>Create</button>
+        <button onClick={logIn}>Login</button>
         {error ? <p style={{ color: "red" }}>{error}</p> : ""}
       </form>
-
-	  <Nav />
+      <Nav />
     </div>
   );
 };

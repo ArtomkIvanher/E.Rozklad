@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom'
 
-import Login from '../components/pages/auth/Login'
-import Signup from '../components/pages/auth/Signup'
+import SignUp from '../components/pages/auth/SignUp'
+import SignIn from '../components/pages/auth/SignIn'
 import Home from '../components/pages/main/Home/Home'
 import Home2 from '../components/pages/main/Home2/Home2'
 import Home3 from '../components/pages/main/Home3/Home3'
@@ -13,12 +13,12 @@ export const routesList = [
 		element: <Navigate to='/main' />,
 	},
 	{
-		path: '/login',
-		element: <Login />,
+		path: '/signup',
+		element: <SignUp />,
 	},
 	{
-		path: '/signup',
-		element: <Signup />,
+		path: '/signin',
+		element: <SignIn /> ,
 	},
 	{
 		path: 'main',

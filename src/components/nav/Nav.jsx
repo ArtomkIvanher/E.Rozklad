@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom'
-import s from './Login.module.scss'
+import s from './Nav.module.scss'
 
-export default function Login() {
+export default function Nav() {
 	return (
-		<div className={s.login}>
+		<div className={s.nav}>
 			<h1>
-				<span>Login</span>
+				<span>Nav</span>
 				<span>
-					<p><Link to="/login">login</Link></p>
-					<p><Link to="/signup">signup</Link></p>
+					<p><Link to="/signup">signUp</Link></p>
+					<p><Link to="/signin">signIn</Link></p>
 					<p><Link to="/main">Main</Link></p>
 					<p><Link to="/main/home">Home</Link></p>
 					<p><Link to="/main/home2">Home2</Link></p>
