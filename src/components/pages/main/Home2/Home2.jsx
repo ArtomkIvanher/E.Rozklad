@@ -1,87 +1,182 @@
-import React, { useEffect, useState } from 'react';
-import { auth } from "../../../../firebase";  // імпортуємо Firebase
-import { saveSchedule, getSchedule, updateSchedule } from "../../../../firestore";  // імпортуємо функції для роботи з Firestore
+import React, { useEffect, useState } from 'react'
+import { auth } from '../../../../firebase' // Імпортуємо Firebase
+import {
+	getSchedule,
+	saveSchedule,
+	updateSchedule,
+} from '../../../../firestore' // Імпортуємо функції для роботи з Firestore
 
-export default function Schedule() {
-  const [schedule, setSchedule] = useState(null);
-  const [authUser, setAuthUser] = useState(null);
+export default function Home2() {
+	const [schedule, setSchedule] = useState(null)
+	const [authUser, setAuthUser] = useState(null)
+	const [newSubject, setNewSubject] = useState({
+		name: '',
+		teacher: '',
+		zoom_link: '',
+	})
 
-  const defaultSchedule = {
-    duration: 120,
-    breaks: [10, 20, 10, 10],
-    start_time: "08:30",
-    repeat: 2,
-    subjects: [
-      { id: 1, name: "Mathematics", teacher: "John Doe", zoom_link: "https://zoom.com/lesson1" },
-      { id: 2, name: "Ukrainian Language", teacher: "Jane Smith", zoom_link: "https://zoom.com/lesson2" },
-      { id: 3, name: "Biology", teacher: "Mark Brown", zoom_link: "https://zoom.com/lesson3" },
-      { id: 4, name: "Physics", teacher: "Emily White", zoom_link: "https://zoom.com/lesson4" },
-      { id: 5, name: "Informatics", teacher: "Alice Green", zoom_link: "https://zoom.com/lesson5" }
-    ],
-    schedule: [
-      { week1: [0], week2: [0], week3: [0], week4: [1, 2, 4] },
-      { week1: [0], week2: [0], week3: [0], week4: [0] },
-      { week1: [0], week2: [0], week3: [0], week4: [0] },
-      { week1: [0], week2: [0], week3: [0], week4: [0] },
-      { week1: [0], week2: [0], week3: [0], week4: [0] },
-      { week1: [0], week2: [0], week3: [2, 1, 4], week4: [0] },
-      { week1: [1, 4, 2], week2: [0], week3: [0], week4: [0] }
-    ]
-  };
+	const defaultSchedule = {
+		duration: 120,
+		breaks: [10, 20, 10, 10],
+		start_time: '08:30',
+		repeat: 1,
+		subjects: [
+			{
+				id: 1,
+				name: 'Mathematics',
+				teacher: 'John Doe',
+				zoom_link: 'https://zoom.com/lesson1',
+			},
+			{
+				id: 2,
+				name: 'Ukrainian Language',
+				teacher: 'Jane Smith',
+				zoom_link: 'https://zoom.com/lesson2',
+			},
+		],
+		schedule: [], // Порожній розклад, може бути заповнений залежно від потреб
+	}
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      setAuthUser(user);
-      // Завантажуємо розклад користувача з Firestore
-      loadSchedule(user.uid);
-    }
-  }, []);
+	useEffect(() => {
+		const user = auth.currentUser
+		if (user) {
+			setAuthUser(user)
+			loadSchedule(user.uid)
+		}
+	}, [])
 
-  const loadSchedule = async (userId) => {
-    const userSchedule = await getSchedule(userId);
-    if (userSchedule) {
-      setSchedule(userSchedule); // Якщо розклад знайдений, зберігаємо його
-    } else {
-      // Якщо розклад не знайдений, використовуємо defaultSchedule
-      setSchedule(defaultSchedule);
-      saveSchedule(userId, defaultSchedule); // Зберігаємо дефолтний розклад для нового користувача
-    }
-  };
+	const loadSchedule = async userId => {
+		const userSchedule = await getSchedule(userId)
+		if (userSchedule) {
+			setSchedule(userSchedule)
+		} else {
+			setSchedule(defaultSchedule)
+			saveSchedule(userId, defaultSchedule)
+		}
+	}
 
-  const handleSaveSchedule = () => {
-    if (authUser) {
-      // Зберігаємо розклад користувача
-      saveSchedule(authUser.uid, schedule);
-    }
-  };
+	const handleAddSubject = () => {
+		if (!newSubject.name || !newSubject.teacher || !newSubject.zoom_link) return
 
-  const handleUpdateSchedule = (updatedSchedule) => {
-    setSchedule(updatedSchedule);
-    if (authUser) {
-      // Оновлюємо розклад у Firestore
-      updateSchedule(authUser.uid, updatedSchedule);
-    }
-  };
+		const newId =
+			schedule.subjects.length > 0
+				? Math.max(...schedule.subjects.map(s => s.id)) + 1
+				: 1
 
-  return (
-    <div>
-      {authUser ? (
-        <div>
-          <h2>Розклад користувача: {authUser.email}</h2>
-          {/* Відображення розкладу та можливість редагувати */}
-          <ul>
-            {schedule && schedule.subjects.map((item, index) => (
-              <li key={index}>
-                {item.name} - {item.teacher} <a href={item.zoom_link}>Zoom link</a>
-              </li>
-            ))}
-          </ul>
-          <button onClick={handleSaveSchedule}>Зберегти розклад</button>
-        </div>
-      ) : (
-        <p>Будь ласка, увійдіть у систему.</p>
-      )}
-    </div>
-  );
+		const updatedSubjects = [...schedule.subjects, { id: newId, ...newSubject }]
+
+		const updatedSchedule = { ...schedule, subjects: updatedSubjects }
+		setSchedule(updatedSchedule)
+		setNewSubject({ name: '', teacher: '', zoom_link: '' })
+
+		if (authUser) {
+			updateSchedule(authUser.uid, updatedSchedule)
+		}
+	}
+
+	const handleEditSubject = (id, field, value) => {
+		const updatedSubjects = schedule.subjects.map(subject =>
+			subject.id === id ? { ...subject, [field]: value } : subject
+		)
+
+		const updatedSchedule = { ...schedule, subjects: updatedSubjects }
+		setSchedule(updatedSchedule)
+
+		if (authUser) {
+			updateSchedule(authUser.uid, updatedSchedule)
+		}
+	}
+
+	const handleDeleteSubject = id => {
+		const updatedSubjects = schedule.subjects.filter(
+			subject => subject.id !== id
+		)
+
+		const updatedSchedule = { ...schedule, subjects: updatedSubjects }
+		setSchedule(updatedSchedule)
+
+		if (authUser) {
+			updateSchedule(authUser.uid, updatedSchedule)
+		}
+	}
+
+	return (
+		<div>
+			{authUser ? (
+				<div>
+					<h2>Розклад користувача: {authUser.email}</h2>
+
+					<div>
+						<h3>Список предметів</h3>
+						{schedule?.subjects.map(subject => (
+							<div key={subject.id}>
+								<input
+									type='text'
+									value={subject.name}
+									onChange={e =>
+										handleEditSubject(subject.id, 'name', e.target.value)
+									}
+									placeholder='Назва предмету'
+								/>
+								<input
+									type='text'
+									value={subject.teacher}
+									onChange={e =>
+										handleEditSubject(subject.id, 'teacher', e.target.value)
+									}
+									placeholder='Викладач'
+								/>
+								<input
+									type='text'
+									value={subject.zoom_link}
+									onChange={e =>
+										handleEditSubject(subject.id, 'zoom_link', e.target.value)
+									}
+									placeholder='Zoom посилання'
+								/>
+								<button onClick={() => handleDeleteSubject(subject.id)}>
+									Видалити
+								</button>
+							</div>
+						))}
+					</div>
+
+					<div>
+						<h3>Додати новий предмет</h3>
+						<input
+							type='text'
+							value={newSubject.name}
+							onChange={e =>
+								setNewSubject({ ...newSubject, name: e.target.value })
+							}
+							placeholder='Назва предмету'
+						/>
+						<input
+							type='text'
+							value={newSubject.teacher}
+							onChange={e =>
+								setNewSubject({ ...newSubject, teacher: e.target.value })
+							}
+							placeholder='Викладач'
+						/>
+						<input
+							type='text'
+							value={newSubject.zoom_link}
+							onChange={e =>
+								setNewSubject({ ...newSubject, zoom_link: e.target.value })
+							}
+							placeholder='Zoom посилання'
+						/>
+						<button onClick={handleAddSubject}>Додати</button>
+					</div>
+
+					<button onClick={() => saveSchedule(authUser.uid, schedule)}>
+						Зберегти розклад
+					</button>
+				</div>
+			) : (
+				<p>Будь ласка, увійдіть у систему.</p>
+			)}
+		</div>
+	)
 }
