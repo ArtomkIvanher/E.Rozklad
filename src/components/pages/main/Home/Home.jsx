@@ -105,11 +105,6 @@ const Home = () => {
     const updatedSchedule = [...dataState.schedule];
     updatedSchedule[weekIndex][weekPart].splice(subjectIndex, 1);  // Видаляємо предмет за індексом
 
-    // Перевіряємо, чи залишились пари у цьому дні, якщо ні — додаємо 0
-    if (updatedSchedule[weekIndex][weekPart].length === 0) {
-      updatedSchedule[weekIndex][weekPart] = [0];
-    }
-
     setData((prevState) => ({
       ...prevState,
       schedule: updatedSchedule
