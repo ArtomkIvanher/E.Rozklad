@@ -4,6 +4,7 @@ import { getSchedule, saveSchedule } from "../../../../firestore";
 import AutoSaveManager from "./AutoSaveManager";
 import ScheduleManager from "./ScheduleManager";
 import SubjectsManager from "./SubjectsManager";
+import ResetDB from './ResetDB'
 
 export default function Home3() {
   const [schedule, setSchedule] = useState(null);
@@ -74,6 +75,7 @@ export default function Home3() {
               }
             />
             <button onClick={handleSaveChanges}>Зберегти зараз</button>
+            <ResetDB/>
           </div>
 
           <SubjectsManager
