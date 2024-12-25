@@ -47,14 +47,13 @@ export default function ScheduleManager({ schedule, setSchedule, subjects }) {
 
   const handleRepeatChange = (newRepeat) => {
     if (newRepeat < 1 || newRepeat > 4 || newRepeat === schedule.repeat) {
-      // Prevent auto-save if the value is the same
       setShowRepeatMenu(false);
       return;
     }
 
     const updatedSchedule = { ...schedule, repeat: newRepeat };
     setSchedule(updatedSchedule);
-    setShowRepeatMenu(false); // Close the menu
+    setShowRepeatMenu(false);
   };
 
   const handleAddDefaultSubject = (dayIndex, weekPart) => {
@@ -63,7 +62,15 @@ export default function ScheduleManager({ schedule, setSchedule, subjects }) {
       ...updatedSchedule.schedule[dayIndex][weekPart],
       0, // Add a new subject with ID 0
     ];
-    setSchedule(updatedSchedule); // Trigger auto-save
+    setSchedule(updatedSchedule);
+  };
+
+  const handleRemoveSubject = (dayIndex, weekPart, subjectIndex) => {
+    const updatedSchedule = { ...schedule };
+    updatedSchedule.schedule[dayIndex][weekPart] = updatedSchedule.schedule[dayIndex][weekPart].filter(
+      (_, index) => index !== subjectIndex
+    );
+    setSchedule(updatedSchedule);
   };
 
   if (!schedule || !schedule.schedule) {
@@ -100,7 +107,7 @@ export default function ScheduleManager({ schedule, setSchedule, subjects }) {
           <h4>{daysOfWeek[dayIndex]}</h4>
           {Object.keys(day)
             .sort((a, b) => parseInt(a.replace('week', '')) - parseInt(b.replace('week', '')))
-            .slice(0, schedule.repeat) // Display only weeks up to the current repeat value
+            .slice(0, schedule.repeat)
             .map((weekPart) => (
               <div key={weekPart}>
                 <h5>{weekPart}</h5>
@@ -127,6 +134,11 @@ export default function ScheduleManager({ schedule, setSchedule, subjects }) {
                         </option>
                       ))}
                     </select>
+                    <button
+                      onClick={() => handleRemoveSubject(dayIndex, weekPart, subjectIndex)}
+                    >
+                      Видалити пару
+                    </button>
                   </div>
                 ))}
               </div>
