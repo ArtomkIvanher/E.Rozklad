@@ -23,7 +23,7 @@ export default function ResetDB() {
             { id: 4, name: "Physics", teacher: "Emily White", zoom_link: "https://zoom.com/lesson4" },
             { id: 5, name: "Informatics", teacher: "Alice Green", zoom_link: "https://zoom.com/lesson5" },
           ],
-          schedule: Array(7).fill({ week1: [0], week2: [0], week3: [0], week4: [0] }),
+          schedule: Array(7).fill({ week1: [], week2: [], week3: [], week4: [] }),
         },
       };
 
